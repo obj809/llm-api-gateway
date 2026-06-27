@@ -22,8 +22,9 @@ Next.js chat route → llm-api-gateway (this service) → litellm → providers
   even when LiteLLM is misconfigured or down.
 - `POST /chat` — body `{ messages: { role, content }[], model: string }`. `model`
   is the LiteLLM `model_name` to call. Opens the LiteLLM completion **before**
-  committing a `200`, so an auth/connectivity failure surfaces as a real non-200
-  (bad key → `401`, unreachable → `502`) instead of corrupting a stream. On
+  committing a `200`, so a pre-stream failure surfaces as a real non-200 instead
+  of corrupting a stream: an upstream error passes through with its status (bad
+  key → `401`, unknown model → `403`), and a connection failure → `502`. On
   success, streams content deltas as `text/plain`. Aborts the upstream if the
   client disconnects (e.g. the UI stop button). Behind the optional shared-secret
   gate when `GATEWAY_API_KEY` is set.
@@ -35,16 +36,20 @@ Copy `.env.example` to `.env`:
 | Var | Required | Purpose |
 | --- | --- | --- |
 | `PORT` | no (default `8787`) | Port to listen on. |
-| `LITELLM_BASE_URL` | yes (for `/chat`) | LiteLLM base URL, e.g. `http://litellm:4000/v1`. |
-| `LITELLM_API_KEY` | yes (for `/chat`) | LiteLLM key (the master key). |
+| `LITELLM_BASE_URL` | yes (for `/chat`) | LiteLLM base URL. Host dev → `http://localhost:4000/v1`; the Docker compose files override this to `http://litellm:4000/v1`. |
+| `LITELLM_API_KEY` | yes (for `/chat`) | LiteLLM key — a virtual key (recommended) or the master key. |
 | `GATEWAY_API_KEY` | no | If set, callers must send it as the `X-Gateway-Key` header. |
 
 ## Local development
 
+Needs a LiteLLM reachable at `http://localhost:4000` (the
+[litellm container](https://github.com/obj809/litellm-docker-container) publishes
+port 4000).
+
 ```bash
 npm install
-cp .env.example .env      # fill in LITELLM_BASE_URL / LITELLM_API_KEY
-npm run dev               # tsx watch on http://localhost:8787
+cp .env.example .env      # set LITELLM_API_KEY; base URL defaults to localhost:4000
+npm run dev               # tsx watch on http://localhost:8787 (auto-loads .env)
 ```
 
 Other scripts: `npm run build` (tsc → `dist/`), `npm start` (run the build),

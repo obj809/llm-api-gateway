@@ -50,13 +50,22 @@ chatRouter.post("/chat", async (req, res) => {
       res.end();
       return;
     }
-    const status = error instanceof OpenAI.APIError ? error.status ?? 502 : 502;
-    res.status(status).json({ error: "The LiteLLM service could not be reached." });
+    // Distinguish "LiteLLM responded with an error" (status set — e.g. bad key
+    // 401, unknown model 403) from "couldn't reach LiteLLM at all" (no status,
+    // e.g. APIConnectionError) → 502.
+    const apiStatus = error instanceof OpenAI.APIError ? error.status : undefined;
+    const message = apiStatus
+      ? `The LiteLLM service responded ${apiStatus}.`
+      : "The LiteLLM service could not be reached.";
+    res.status(apiStatus ?? 502).json({ error: message });
     return;
   }
 
   res.setHeader("Content-Type", "text/plain; charset=utf-8");
   res.setHeader("Cache-Control", "no-store");
+  // Tell nginx/NPM not to buffer the response, so tokens stream out as they
+  // arrive instead of arriving in one lump (preserves the typewriter effect).
+  res.setHeader("X-Accel-Buffering", "no");
 
   try {
     for await (const chunk of stream) {
