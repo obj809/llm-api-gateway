@@ -5,3 +5,4 @@ dist/
 *.log
 DEPLOY.md
 CLAUDE.md
+commands.md
