@@ -1,0 +1,27 @@
+# VPS deployment. Runs on the external `webnet` network so it reaches the litellm
+# container directly by name (http://litellm:4000) — no nginx hop, and LiteLLM
+# stays internal-only. NPM (npm-app-1) is also on `webnet`, so it proxies the
+# public domain to this container by name. No host ports are published; like every
+# other backend, it's reached only over `webnet`.
+#
+# Run:  docker compose -f docker-compose.prod.yml up -d --build
+services:
+  llm-api-gateway:
+    build: .
+    image: llm-api-gateway:latest
+    container_name: llm-api-gateway
+    restart: unless-stopped
+    # Provides PORT, LITELLM_BASE_URL (http://litellm:4000/v1), LITELLM_API_KEY,
+    # GATEWAY_API_KEY.
+    env_file: .env
+    # Documents the listen port; not published to the host (webnet-only).
+    expose:
+      - "8787"
+    networks:
+      - webnet
+
+# `webnet` is created/owned by NPM's compose; declare it external so a recreate
+# here doesn't try to manage it (and so we stay attached — see HANDOFF §5a).
+networks:
+  webnet:
+    external: true
