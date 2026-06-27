@@ -11,9 +11,12 @@ services:
     image: llm-api-gateway:latest
     container_name: llm-api-gateway
     restart: unless-stopped
-    # Provides PORT, LITELLM_BASE_URL (http://litellm:4000/v1), LITELLM_API_KEY,
-    # GATEWAY_API_KEY.
+    # Provides PORT, LITELLM_API_KEY, GATEWAY_API_KEY (LITELLM_BASE_URL is set
+    # below for the container; any host value in .env is overridden).
     env_file: .env
+    environment:
+      # Reached over webnet by name, not the host's localhost.
+      - LITELLM_BASE_URL=http://litellm:4000/v1
     # Documents the listen port; not published to the host (webnet-only).
     expose:
       - "8787"

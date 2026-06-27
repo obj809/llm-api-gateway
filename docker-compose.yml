@@ -13,9 +13,13 @@ services:
     build: .
     image: llm-api-gateway:latest
     container_name: llm-api-gateway
-    # Provides PORT, LITELLM_BASE_URL (http://litellm:4000/v1), LITELLM_API_KEY,
-    # GATEWAY_API_KEY.
+    # Provides PORT, LITELLM_API_KEY, GATEWAY_API_KEY (and a host-oriented
+    # LITELLM_BASE_URL used by `npm run dev`, overridden below for the container).
     env_file: .env
+    environment:
+      # In the container LiteLLM is reached over webnet by name, not via the
+      # host's localhost. Overrides whatever .env has (env_file < environment).
+      - LITELLM_BASE_URL=http://litellm:4000/v1
     # Published so the host (Next.js dev server) can reach the gateway.
     ports:
       - "8787:8787"
