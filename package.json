@@ -1,0 +1,34 @@
+{
+  "name": "llm-api-gateway",
+  "version": "1.0.0",
+  "description": "Express gateway between the Next.js chat route and the VPS LiteLLM service.",
+  "main": "dist/index.js",
+  "scripts": {
+    "dev": "tsx watch src/index.ts",
+    "build": "tsc",
+    "start": "node dist/index.js",
+    "typecheck": "tsc --noEmit"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/obj809/llm-api-gateway.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/obj809/llm-api-gateway/issues"
+  },
+  "homepage": "https://github.com/obj809/llm-api-gateway#readme",
+  "dependencies": {
+    "express": "^5.2.1",
+    "openai": "^4.77.0"
+  },
+  "devDependencies": {
+    "@types/express": "^5.0.0",
+    "@types/node": "^22.10.0",
+    "tsx": "^4.19.2",
+    "typescript": "^5.7.2"
+  }
+}
