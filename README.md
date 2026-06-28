@@ -48,8 +48,8 @@ port 4000).
 
 ```bash
 npm install
-cp .env.example .env      # set LITELLM_API_KEY; base URL defaults to localhost:4000
-npm run dev               # tsx watch on http://localhost:8787 (auto-loads .env)
+cp .env.example .env.local      # set LITELLM_API_KEY; base URL defaults to localhost:4000
+npm run dev               # tsx watch on http://localhost:8787 (auto-loads .env.local)
 ```
 
 Other scripts: `npm run build` (tsc → `dist/`), `npm start` (run the build),

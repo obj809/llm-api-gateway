@@ -4,7 +4,7 @@
   "description": "Express gateway between the Next.js chat route and the VPS LiteLLM service.",
   "main": "dist/index.js",
   "scripts": {
-    "dev": "tsx watch --env-file-if-exists=.env src/index.ts",
+    "dev": "tsx watch --env-file-if-exists=.env.local src/index.ts",
     "build": "tsc",
     "start": "node dist/index.js",
     "typecheck": "tsc --noEmit"
