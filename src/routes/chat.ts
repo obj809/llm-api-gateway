@@ -27,7 +27,7 @@ chatRouter.post("/chat", async (req, res) => {
 
   let conn: { baseUrl: string; apiKey: string };
   try {
-    conn = requireLiteLLM();
+    conn = requireLiteLLM(model);
   } catch (error) {
     res.status(500).json({
       error: error instanceof Error ? error.message : "Gateway misconfigured.",

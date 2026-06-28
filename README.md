@@ -37,7 +37,9 @@ Copy `.env.example` to `.env`:
 | --- | --- | --- |
 | `PORT` | no (default `8787`) | Port to listen on. |
 | `LITELLM_BASE_URL` | yes (for `/chat`) | LiteLLM base URL. Host dev → `http://localhost:4000/v1`; the Docker compose files override this to `http://litellm:4000/v1`. |
-| `LITELLM_API_KEY` | yes (for `/chat`) | LiteLLM key — a virtual key (recommended) or the master key. |
+| `LITELLM_API_KEY` | yes (for `/chat`) | LiteLLM key — a virtual key (recommended) or the master key. Used for every model except those in `OLLAMA_MODELS`. |
+| `LITELLM_OLLAMA_API_KEY` | no | Separate LiteLLM key for the models in `OLLAMA_MODELS`. Unset → those models also use `LITELLM_API_KEY`. |
+| `OLLAMA_MODELS` | no | Comma-separated model names routed to `LITELLM_OLLAMA_API_KEY` (e.g. `llama3.2,deepseek-r1`). |
 | `GATEWAY_API_KEY` | no | If set, callers must send it as the `X-Gateway-Key` header. |
 
 ## Local development
