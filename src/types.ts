@@ -9,6 +9,5 @@ export type ChatMessage = {
 
 export type ChatRequest = {
   messages: ChatMessage[];
-  // The LiteLLM `model_name` to call (the route sends `upstreamModel ?? id`).
   model: string;
 };

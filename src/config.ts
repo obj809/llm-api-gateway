@@ -2,8 +2,6 @@
 // here but only asserted when the /chat route needs them (see requireLiteLLM),
 // so /health can run without any LiteLLM env set.
 
-// Parses a comma/whitespace-separated model list (e.g. "llama3.2, deepseek-r1")
-// into a lookup set, dropping blanks.
 function parseModelList(raw: string | undefined): Set<string> {
   return new Set(
     (raw ?? "")
