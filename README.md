@@ -6,14 +6,8 @@ a [LiteLLM](https://docs.litellm.ai/) gateway. The Next.js chat route forwards a
 conversation here; this service calls LiteLLM (OpenAI-compatible) and streams the
 reply back as plaintext.
 
-It exists so the Next.js app never holds the LiteLLM key or talks to LiteLLM
-directly: this gateway owns that connection, and on the VPS it reaches the
-`litellm` container directly over the internal Docker network — keeping LiteLLM
-internal-only.
-
 ```
-Next.js chat route → llm-api-gateway (this service) → litellm → providers
-                       holds the key, owns the OpenAI SDK call
+Next.js chat route → llm-api-gateway → litellm → providers own the OpenAI SDK call
 ```
 
 ## Endpoints
@@ -26,8 +20,7 @@ Next.js chat route → llm-api-gateway (this service) → litellm → providers
   of corrupting a stream: an upstream error passes through with its status (bad
   key → `401`, unknown model → `403`), and a connection failure → `502`. On
   success, streams content deltas as `text/plain`. Aborts the upstream if the
-  client disconnects (e.g. the UI stop button). Behind the optional shared-secret
-  gate when `GATEWAY_API_KEY` is set.
+  client disconnects. Behind the optional shared-secret gate when `GATEWAY_API_KEY` is set.
 
 ## Environment
 
@@ -51,7 +44,7 @@ port 4000).
 ```bash
 npm install
 cp .env.example .env.local      # set LITELLM_API_KEY; base URL defaults to localhost:4000
-npm run dev               # tsx watch on http://localhost:8787 (auto-loads .env.local)
+npm run dev                     # tsx watch on http://localhost:8787 (auto-loads .env.local)
 ```
 
 Other scripts: `npm run build` (tsc → `dist/`), `npm start` (run the build),
@@ -74,7 +67,7 @@ network already exists; otherwise `docker network create webnet`).
 # Local — publishes 8787 so a host `npm run dev` can reach it at localhost:8787
 docker compose up --build
 
-# VPS — no host ports; reached only over webnet (by the nginx proxy)
+# Production — no host ports; reached only over webnet
 docker compose -f docker-compose.prod.yml up -d --build
 ```
 
