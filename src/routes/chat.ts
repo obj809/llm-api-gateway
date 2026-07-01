@@ -6,11 +6,6 @@ import type { ChatRequest } from "../types";
 
 export const chatRouter = Router();
 
-// POST /chat — validate { messages, model }, open the LiteLLM stream, and pipe
-// content deltas back as text/plain (the contract the Next.js route forwards to
-// the browser typewriter). Mirrors the error handling the route used to do
-// inline: a pre-stream failure becomes a real non-200, an in-flight client
-// disconnect aborts the upstream cleanly.
 chatRouter.post("/chat", async (req, res) => {
   const body = req.body as Partial<ChatRequest> | undefined;
 
@@ -35,13 +30,9 @@ chatRouter.post("/chat", async (req, res) => {
     return;
   }
 
-  // Abort the upstream when the client goes away (e.g. the UI stop button aborts
-  // the Next.js fetch, which closes this connection).
   const ac = new AbortController();
   res.on("close", () => ac.abort());
 
-  // Open the completion BEFORE committing a 200, so a bad key (401) or an
-  // unreachable LiteLLM (502) is a real HTTP error, not a broken stream.
   let stream;
   try {
     stream = await openUpstream(conn.baseUrl, conn.apiKey, model, messages, ac.signal);
@@ -50,9 +41,7 @@ chatRouter.post("/chat", async (req, res) => {
       res.end();
       return;
     }
-    // Distinguish "LiteLLM responded with an error" (status set — e.g. bad key
-    // 401, unknown model 403) from "couldn't reach LiteLLM at all" (no status,
-    // e.g. APIConnectionError) → 502.
+
     const apiStatus = error instanceof OpenAI.APIError ? error.status : undefined;
     const message = apiStatus
       ? `The LiteLLM service responded ${apiStatus}.`
@@ -63,8 +52,6 @@ chatRouter.post("/chat", async (req, res) => {
 
   res.setHeader("Content-Type", "text/plain; charset=utf-8");
   res.setHeader("Cache-Control", "no-store");
-  // Tell nginx/NPM not to buffer the response, so tokens stream out as they
-  // arrive instead of arriving in one lump (preserves the typewriter effect).
   res.setHeader("X-Accel-Buffering", "no");
 
   try {
@@ -74,8 +61,6 @@ chatRouter.post("/chat", async (req, res) => {
     }
     res.end();
   } catch (error) {
-    // Headers are already sent, so we can't change the status. A client abort is
-    // expected (not an error); anything else we log and just close the stream.
     if (!ac.signal.aborted) {
       console.error("LiteLLM stream error:", error);
     }
