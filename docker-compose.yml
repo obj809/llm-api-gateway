@@ -1,11 +1,7 @@
 # Local run. Joins the same external `webnet` network as the litellm container
-# (https://github.com/obj809/litellm-docker-container), so it reaches LiteLLM by
-# name at http://litellm:4000 — exactly like prod. The only difference from
-# docker-compose.prod.yml: this publishes 8787 to the host so a Next.js dev server
-# (`npm run dev`, GATEWAY_URL=http://localhost:8787) can reach it.
 #
-# Prereq: the litellm container is running. Its compose also declares `webnet`
-# external, so the network already exists. If not: `docker network create webnet`.
+# Prereq: the litellm container is running and an external webnet docker network is created.
+# If not: `docker network create webnet`.
 #
 # Run:  docker compose up --build
 services:
@@ -13,20 +9,14 @@ services:
     build: .
     image: llm-api-gateway:latest
     container_name: llm-api-gateway
-    # Provides PORT, LITELLM_API_KEY, GATEWAY_API_KEY (and a host-oriented
-    # LITELLM_BASE_URL used by `npm run dev`, overridden below for the container).
     env_file: .env.local
     environment:
-      # In the container LiteLLM is reached over webnet by name, not via the
-      # host's localhost. Overrides whatever .env.local has (env_file < environment).
       - LITELLM_BASE_URL=http://litellm:4000/v1
-    # Published so the host (Next.js dev server) can reach the gateway.
     ports:
       - "8787:8787"
     networks:
       - webnet
 
-# Shared with the litellm container; created by whichever compose comes up first.
 networks:
   webnet:
     external: true

@@ -3,6 +3,5 @@ dist/
 .env
 .env.local
 *.log
-DEPLOY.md
 CLAUDE.md
 commands.md
